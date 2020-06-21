@@ -18,7 +18,7 @@ class DataSet():
         self.data = [[] for i in range(13)]
         self.label = []
         
-    def preprocessing(self, filename, scale=0.7):
+    def preprocessing(self, filename,):
         cnt = 0
         with open(filename, 'r') as sourcefile:
             lines = csv.reader(sourcefile, delimiter = ',')
@@ -27,20 +27,23 @@ class DataSet():
                 for i in range(13):
                     self.data[i].append(float(line[i+1]))
                 cnt += 1
-        # 标准化
+        # min-max归一化
         for i in range(13):
-            self.data[i] = np.array(self.data[i]) - np.min(np.array(self.data[i]))
+            column = np.array(self.data[i])
+            self.data[i] = (column - np.min(column, axis=0)) / \
+                            (np.max(column, axis=0) - np.min(column, axis=0))
             self.data[i] = self.data[i].tolist()
         # shuffle
-        tempDataSet = self.data
-        tempDataSet.append(self.label)
-        tempDataSet = np.array(tempDataSet).T
-        np.random.shuffle(tempDataSet)
-        # print(tempDataSet)
-        self.dataSet, self.label = np.split(tempDataSet, [-1], 1)
-        self.dataSet = np.array(self.dataSet)
-        self.label = self.label.flatten()
-        self.label = self.label.tolist()
+#        tempDataSet = self.data
+#        tempDataSet.append(self.label)
+#        tempDataSet = np.array(tempDataSet).T
+        # np.random.shuffle(tempDataSet)
+        self.dataSet = np.array(self.data.copy()).T
+        print(self.dataSet)
+#        self.dataSet, self.label = np.split(tempDataSet, [-1], 1)
+#        self.dataSet = np.array(self.dataSet)
+#        self.label = self.label.flatten()
+#        self.label = self.label.tolist()
 #        print(self.label)
         
         
@@ -108,6 +111,13 @@ def visualize(dataset, label, K=3):
     plt.scatter(greenX, greenY, c='g', marker='.')
     plt.show()
     
+    
+def tsne(data, label):
+    from sklearn.manifold import TSNE
+    tsne = TSNE(n_components=2, init='pca')
+    result = tsne.fit_transform(data)
+    visualize(result, label)
+    
 
 if __name__ == "__main__":
     winefile = "../input/wine.csv"
@@ -117,23 +127,41 @@ if __name__ == "__main__":
     
     print("---------PCA------------")
     pca = PCA()
-    dimmedset = pca.fit(data=dataset.dataSet)
-    # print(dimmedset)
+    dimmedset = pca.fit(dataset.dataSet)
+#    print(dimmedset)
     
     print("---------K-means------------")
     kmeans = Kmeans()
+    
     print("---------不采用降维数据------------")
     predictlabel = kmeans.cluster(dataset.dataSet)
 #    print(predictlabel)
     evaluate(dataset.label, predictlabel, dataset.dataSet)
+    print("使用TSNE对不降维的聚类结果可视化:")
+    tsne(dataset.dataSet, predictlabel)
+#    print("---------Output------------")
+#    filename = "../output/undimmedCluster.csv"
+#    with open(filename, 'w', newline='') as outfile:
+#        outlist = (np.array(predictlabel)[:, np.newaxis]).tolist()
+#        writer = csv.writer(outfile)
+#        for i in range(len(outlist)):
+#            writer.writerow(outlist[i])
+        
+    
     print("---------采用降维数据------------")
     print("维数: dim = " + str(pca.dim))
     predictlabel = kmeans.cluster(dimmedset)
 #    print(predictlabel)
     evaluate(dataset.label, predictlabel, dimmedset)
     if pca.dim == 2:
-        visualize(dimmedset, predictlabel)
+        visualize(dimmedset, predictlabel)  
+#    print("---------Output------------")
+#    filename = "../output/dimmedCluster.csv"
+#    with open(filename, 'w', newline='') as outfile:
+#        outlist = (np.array(predictlabel)[:, np.newaxis]).tolist()
+#        writer = csv.writer(outfile)
+#        for i in range(len(outlist)):
+#            writer.writerow(outlist[i])
     
-    
-    
+
     

@@ -165,7 +165,7 @@ if __name__ == "__main__":
         lr = LogisticRegression()
         dataset.preprocessing(porfile, 0.7, usingG=0, isSVM=0)
         lr.training(trainset=dataset.trainset, trainlabel=dataset.trainlabel, 
-                    alpha=0.005, iteration=200)
+                    alpha=0.05, iteration=500)
         predictlabel = lr.test(testset=dataset.testset)
         print(predictlabel)
         evaluation(dataset.testlabel, predictlabel)

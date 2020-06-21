@@ -13,7 +13,7 @@ class Kmeans():
         self.trainset = np.array([[]])
         self.predictlabel = []
         
-    def cluster(self, data, K=3, epsilon=0.5):
+    def cluster(self, data, K=3, epsilon=0.001):
         self.trainset = np.array(data)
         self.count = self.trainset.shape[0]
         self.dim = self.trainset.shape[1]

@@ -11,7 +11,7 @@ class PCA():
     def __init__(self):
         self.trainset = np.array([[]])
         
-    def fit(self, data, threshold = 0.999):
+    def fit(self, data, threshold = 0.95):
         self.trainset = np.array(data)    # m × n
         normMatrix = self.trainset - self.trainset.mean(axis = 0)
         covMatrix = np.cov(normMatrix.T)    # 转置为 n × m
